@@ -55,7 +55,7 @@ public func >>- <T, U>(a: T?, f: (T) -> U?) -> U? {
     - returns: A value of type `Optional<U>`
 */
 public func -<< <T, U>(f: (T) -> U?, a: T?) -> U? {
-  return a.flatMap(f)
+    return a.flatMap(f)
 }
 
 /**

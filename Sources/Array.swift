@@ -8,7 +8,7 @@
 
     - returns: A value of type `[U]`
 */
-public func <^> <T, U>(f: (T) -> U, a: [T]) -> [U] {
+public func <^> <T: Sequence, ElementOfResult>(f: (T.Iterator.Element) -> ElementOfResult, a: T) -> [ElementOfResult] {
     return a.map(f)
 }
 
@@ -22,7 +22,8 @@ public func <^> <T, U>(f: (T) -> U, a: [T]) -> [U] {
 
     - returns: A value of type `[U]`
 */
-public func <*> <T, U>(fs: [(T) -> U], a: [T]) -> [U] {
+public func <*> <T: Sequence, U: Sequence, ElementOfResult>(fs: T, a: U) -> [ElementOfResult]
+    where T.Iterator.Element == (U.Iterator.Element) -> [ElementOfResult] {
     return a.apply(fs)
 }
 
@@ -36,7 +37,7 @@ public func <*> <T, U>(fs: [(T) -> U], a: [T]) -> [U] {
 
     - returns: A value of type `[U]`
 */
-public func >>- <T, U>(a: [T], f: (T) -> [U]) -> [U] {
+public func >>- <T: Sequence, ElementOfResult>(a: T, f: (T.Iterator.Element) -> [ElementOfResult]) -> [ElementOfResult] {
     return a.flatMap(f)
 }
 
@@ -50,7 +51,7 @@ public func >>- <T, U>(a: [T], f: (T) -> [U]) -> [U] {
 
     - returns: A value of type `[U]`
 */
-public func -<< <T, U>(f: (T) -> [U], a: [T]) -> [U] {
+public func -<< <T: Sequence, ElementOfResult>(f: (T.Iterator.Element) -> [ElementOfResult], a: T) -> [ElementOfResult] {
   return a.flatMap(f)
 }
 
@@ -64,7 +65,7 @@ public func -<< <T, U>(f: (T) -> [U], a: [T]) -> [U] {
 
     - returns: A value of type `[V]`
 */
-public func >-> <T, U, V>(f: @escaping (T) -> [U], g: @escaping (U) -> [V]) -> (T) -> [V] {
+public func >-> <T, U: Sequence, V>(f: @escaping (T) -> U, g: @escaping (U.Iterator.Element) -> [V]) -> (T) -> [V] {
     return { x in f(x) >>- g }
 }
 
@@ -78,7 +79,7 @@ public func >-> <T, U, V>(f: @escaping (T) -> [U], g: @escaping (U) -> [V]) -> (
 
     - returns: A value of type `[V]`
 */
-public func <-< <T, U, V>(f: @escaping (U) -> [V], g: @escaping (T) -> [U]) -> (T) -> [V] {
+public func <-< <T, U: Sequence, V>(f: @escaping (U.Iterator.Element) -> [V], g: @escaping (T) -> U) -> (T) -> [V] {
     return { x in g(x) >>- f }
 }
 
@@ -93,17 +94,18 @@ public func pure<T>(_ a: T) -> [T] {
     return [a]
 }
 
-public extension Array {
+public extension Sequence {
     /**
-        apply an array of functions to `self`
-
-        This will return a new array resulting from the matrix of each function being applied to each value inside `self`
-
-        - parameter fs: An array of transformation functions from type `Element` to type `T`
-
-        - returns: A value of type `[T]`
-    */
-    func apply<T>(_ fs: [(Element) -> T]) -> [T] {
-        return fs.flatMap { self.map($0) }
+     apply an array of functions to `self`
+     
+     This will return a new array resulting from the matrix of each function being applied to each value inside `self`
+     
+     - parameter fs: An array of transformation functions from type `Element` to type `T`
+     
+     - returns: A value of type `[T]`
+     */
+    func apply<T: Sequence, ElementOfResult>(_ fs: T) -> [ElementOfResult]
+        where T.Iterator.Element == (Iterator.Element) -> [ElementOfResult] {
+            return fs.flatMap { self.flatMap($0) }
     }
 }
