@@ -24,8 +24,9 @@ public func <^> <T, U>(f: (T) -> U, a: T?) -> U? {
 
     - returns: A value of type `Optional<U>`
 */
-public func <*> <T, U>(f: ((T) -> U)?, a: T?) -> U? {
-    return a.apply(f)
+public func <*> <T, U>(f: ((T) -> U)?, a: @autoclosure () -> T?) -> U? {
+    guard let f = f else { return nil }
+    return a().map(f)
 }
 
 /**
